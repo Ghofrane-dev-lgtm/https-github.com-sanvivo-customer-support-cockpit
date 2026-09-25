@@ -6,4 +6,6 @@
 3. `uvicorn main:app --reload --port 8000`
 4. Second terminal: `cd frontend && npm install && npm run dev` → open http://localhost:5173
 
-Design decisions: see [DECISIONS.md](DECISIONS.md).
+Design decisions: [DECISIONS.md](DECISIONS.md)
+
+![Cockpit: ranked queue, trust verdict and agent trace](docs/screenshot.png)

@@ -14,6 +14,7 @@ warning points at the trace step it came from, which the trace view highlights.
 Deliberately simple, keyword/threshold rules — transparent and explainable, but they miss
 paraphrases. Not detected yet: prompt injection (TKT-1004), the agent echoing health data
 (TKT-1008), parcels stuck at DHL Leipzig although the agent says "1–2 days" (TKT-2001–2008).
+No LLM call anywhere, so the OpenAI key is not needed to run the app.
 Not built: reply assistant (W3), rating loop (W4), DHL clustering (W5), team view (W7), login
 (the user is hard-coded as "Lena"). Next: cluster the DHL wave into one bulk action, add the
 missing safety rules, let Lena mark a warning as false alarm to tune the weights.
@@ -33,5 +34,13 @@ Claude Code (via claude.ai): explained the codebase and task, proposed the serve
 and wrote the code with me. I built the backend part step by step (`signals.py`, the `main.py`
 wiring, the types in `api.ts`) and checked each step against the seed data; the frontend
 components were added by Claude Code and reviewed by me.
-Rejected / changed: TODO — write your own (e.g. a first, longer rule set that was too complex to
-explain line by line → replaced by a simpler one; fetching every trace from the browser → too slow).
+Where it helped: understanding an unfamiliar codebase fast, the server/client split, and
+debugging (the TypeScript checker found a missing brace; a `Signals.py` vs `signals.py` case
+mismatch that works on Windows but breaks on Linux).
+Rejected / changed:
+- The first `signals.py` it proposed (~170 lines, regexes for personal data and prompt injection,
+  timezone handling) — I could not explain every line, so I asked for a smaller rule set I can
+  defend. Cost: TKT-1004 and TKT-1008 are no longer flagged (listed under Trade-offs).
+- Its first plan, before it had seen the repo, was a generic OpenAI-based chatbot. That is the
+  wrong product: the agent already exists, the task is the tool for the humans behind it. W1/W2
+  need no LLM — rules are instant, free and explainable; an LLM judging the agent could be wrong too.
