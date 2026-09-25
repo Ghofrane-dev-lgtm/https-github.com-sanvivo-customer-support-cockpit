@@ -19,7 +19,7 @@ from sqlalchemy import Boolean, Column, DateTime, String, Text, create_engine, f
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from seed import SLOW_TRACE_TICKETS, load_seed
-
+from signals import analyze
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cockpit.db")
@@ -61,6 +61,7 @@ def get_db():
 def to_summary(t: Ticket) -> dict[str, Any]:
     messages = json.loads(t.messages_json)
     last = messages[-1] if messages else None
+    trace = json.loads(t.trace_json) if t.trace_json else None
     return {
         "id": t.id,
         "subject": t.subject,
@@ -78,6 +79,7 @@ def to_summary(t: Ticket) -> dict[str, Any]:
         "last_message_at": last["created_at"] if last else None,
         "last_message_preview": (last["text"][:140] if last else None),
         "has_trace": t.trace_json is not None,
+        **analyze(messages, trace, t.status, t.priority, t.assignee, t.escalated),
     }
 
 
@@ -265,6 +267,8 @@ def patch_ticket(
         raise HTTPException(status_code=404, detail="Ticket nicht gefunden")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(t, field, value)
+    if payload.status == "escalated":
+        t.escalated = True    
     t.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(t)
