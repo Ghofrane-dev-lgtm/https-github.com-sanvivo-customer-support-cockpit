@@ -30,17 +30,18 @@ missing safety rules, let Lena mark a warning as false alarm to tune the weights
   English; TKT-1019 is a repeat refund (possible abuse signal).
 
 ## AI usage
-Claude Code (via claude.ai): explained the codebase and task, proposed the server/client split,
-and wrote the code with me. I built the backend part step by step (`signals.py`, the `main.py`
-wiring, the types in `api.ts`) and checked each step against the seed data; the frontend
-components were added by Claude Code and reviewed by me.
-Where it helped: understanding an unfamiliar codebase fast, the server/client split, and
-debugging (the TypeScript checker found a missing brace; a `Signals.py` vs `signals.py` case
-mismatch that works on Windows but breaks on Linux).
-Rejected / changed:
-- The first `signals.py` it proposed (~170 lines, regexes for personal data and prompt injection,
-  timezone handling) — I could not explain every line, so I asked for a smaller rule set I can
-  defend. Cost: TKT-1004 and TKT-1008 are no longer flagged (listed under Trade-offs).
-- Its first plan, before it had seen the repo, was a generic OpenAI-based chatbot. That is the
-  wrong product: the agent already exists, the task is the tool for the humans behind it. W1/W2
-  need no LLM — rules are instant, free and explainable; an LLM judging the agent could be wrong too.
+Tool: Claude Code. My rule: the AI drafts, I decide and verify — and I only keep code I can explain.
+- **Understand before building.** I first had it walk me through the repo, the endpoints and the
+  seed data, and only then settled on the bets — the Choices above rest on cases found in the data.
+- **Own the core, delegate the boilerplate.** I built the logic that carries the decisions myself,
+  step by step (`signals.py`, its wiring in `main.py`, the types in `api.ts`). Under time pressure
+  I let it generate the UI components from that contract, then reviewed them.
+- **Verify every step, don't trust output.** After each step I ran a check against real data
+  (the ranking script, the API response, `tsc`). This caught real bugs: a missing brace that
+  greyed out half of `api.ts`, and a `Signals.py`/`signals.py` case mismatch that works on Windows
+  but breaks on Linux. Before the final push it ran typecheck, lint, build and a browser run.
+- **Rejected:** its first `signals.py` (~170 lines, regexes for personal data and prompt injection,
+  timezone handling). It worked, but I could not defend every line, so I had it cut to rules I
+  can explain — accepting that TKT-1004/1008 are no longer flagged (see Trade-offs).
+- **Rejected:** its first plan, made before it had seen the repo — a generic OpenAI chatbot. The
+  agent already exists; the product is the tool for the humans behind it, and W1/W2 need no LLM.
