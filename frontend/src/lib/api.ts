@@ -21,6 +21,7 @@ export interface Message {
   text: string;
   created_at: string;
 }
+
 export interface Flag {
   code: string;
   label: string;
@@ -46,7 +47,7 @@ export interface TicketSummary {
   message_count: number;
   last_message_at: string | null;
   last_message_preview: string | null;
-  has_trace: boolean
+  has_trace: boolean;
   flags: Flag[];
   trust: { level: TrustLevel; label: string };
   confidence: number | null;
@@ -92,6 +93,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await res.json().catch(() => ({}));
     const error = new Error(body.detail ?? `Anfrage fehlgeschlagen (${res.status})`);
     throw Object.assign(error, { status: res.status });
+  }
   return res.json();
 }
 
